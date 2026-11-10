@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="StreamVault — a personal, offline video library and player.">
+  <meta name="theme-color" content="#0b0b0f">
+  <title>StreamVault — Personal Video Library</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar" id="topbar">
+    <div class="topbar-left">
+      <button class="icon-btn" id="menuBtn" data-action="toggle-sidebar" aria-label="Toggle sidebar" title="Toggle sidebar">
+        <span data-icon="menu"></span>
+      </button>
+      <a class="brand" href="#/home" aria-label="StreamVault home">
+        <img class="brand-logo" src="assets/logo.png" alt="" width="38" height="38">
+        <span class="brand-name">Stream<span>Vault</span></span>
+      </a>
+    </div>
+
+    <div class="search-area" id="searchArea">
+      <form class="search-form" id="searchForm" role="search" autocomplete="off">
+        <div class="search-box">
+          <span class="search-icon" data-icon="search"></span>
+          <input id="searchInput" type="search" placeholder="Search your library" aria-label="Search videos" spellcheck="false">
+          <button type="button" class="search-clear" id="searchClear" data-action="clear-search" aria-label="Clear search" hidden>
+            <span data-icon="close"></span>
+          </button>
+        </div>
+        <button class="search-submit" type="submit" aria-label="Search">
+          <span data-icon="search"></span>
+        </button>
+      </form>
+      <div class="suggestions" id="suggestions" role="listbox" aria-label="Search suggestions" hidden></div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="pill-btn" data-action="open-import" title="Add videos from your computer">
+        <span data-icon="plus"></span>
+        <span class="pill-label">Add videos</span>
+      </button>
+      <button class="icon-btn" data-action="random" title="Play a random video" aria-label="Play a random video">
+        <span data-icon="shuffle"></span>
+      </button>
+      <a class="icon-btn" href="#/history" title="Watch history" aria-label="Watch history">
+        <span data-icon="clock"></span>
+      </a>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <div class="scrim" id="scrim" data-action="close-sidebar" hidden></div>
+
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+      <nav class="nav-group">
+        <a class="nav-item" href="#/home" data-nav="home">
+          <span class="nav-icon" data-icon="home"></span>
+          <span class="nav-label">Home</span>
+        </a>
+        <a class="nav-item" href="#/videos" data-nav="videos">
+          <span class="nav-icon" data-icon="library"></span>
+          <span class="nav-label">All Videos</span>
+          <span class="nav-badge" id="navVideoCount">0</span>
+        </a>
+        <a class="nav-item" href="#/continue" data-nav="continue">
+          <span class="nav-icon" data-icon="playCircle"></span>
+          <span class="nav-label">Continue Watching</span>
+        </a>
+        <a class="nav-item" href="#/history" data-nav="history">
+          <span class="nav-icon" data-icon="clock"></span>
+          <span class="nav-label">Recently Watched</span>
+        </a>
+        <a class="nav-item" href="#/favorites" data-nav="favorites">
+          <span class="nav-icon" data-icon="heart"></span>
+          <span class="nav-label">Favorites</span>
+          <span class="nav-badge" id="navFavCount">0</span>
+        </a>
+      </nav>
+
+      <div class="nav-divider"></div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Categories</div>
+        <div class="nav-categories" id="sidebarCategories"></div>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <div class="sidebar-footer">
+        <button class="side-import-btn" data-action="open-import">
+          <span data-icon="folderPlus"></span>
+          <span class="nav-label">Import more videos</span>
+        </button>
+        <p class="sidebar-note">Your files stay on this device. Nothing is uploaded.</p>
+      </div>
+    </aside>
+
+    <main class="main" id="main" tabindex="-1">
+      <div class="view-loading" id="viewLoading">
+        <div class="spinner large"></div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="importModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="importTitle">Add videos to your library</h2>
+          <p>Pick files or a folder from your computer. They play instantly — no upload, no server.</p>
+        </div>
+        <button class="icon-btn" data-action="close-import" aria-label="Close dialog">
+          <span data-icon="close"></span>
+        </button>
+      </div>
+
+      <div class="import-actions">
+        <button class="btn btn-primary" data-action="pick-files">
+          <span data-icon="videoFile"></span>
+          Choose video files
+        </button>
+        <button class="btn" data-action="pick-folder">
+          <span data-icon="folder"></span>
+          Choose a folder
+        </button>
+      </div>
+
+      <div class="import-notes">
+        <div class="note">
+          <strong>Why can't the page scan my folder automatically?</strong>
+          For security, browsers never expose a drive's file list to a web page. A site must either be
+          given files by you, or use the File System Access API (Chrome/Edge on localhost or HTTPS).
+        </div>
+        <div class="note">
+          <strong>Two ways to build your library</strong>
+          Keep permanent videos in <code>videos/</code> and register them in the
+          <code>DEFAULT_LIBRARY</code> list at the top of <code>script.js</code>. Files you import here are
+          available for this session only; their watch progress is remembered by file name and size.
+        </div>
+      </div>
+
+      <p class="import-hint">
+        <span data-icon="info"></span>
+        Tip: you can select several files at once. Supported: MP4, WebM, OGG, MOV, M4V and MKV
+        (depends on your browser's codec support).
+      </p>
+    </div>
+  </div>
+
+  <input id="fileInput" type="file" accept="video/*,.mkv,.m4v,.mov" multiple hidden>
+  <input id="folderInput" type="file" accept="video/*,.mkv,.m4v,.mov" multiple hidden webkitdirectory directory>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="drop-overlay" id="dropOverlay" hidden>
+    <div class="drop-card">
+      <span data-icon="folderPlus"></span>
+      <strong>Drop videos to add them</strong>
+      <span>They stay on your device</span>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
